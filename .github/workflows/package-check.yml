@@ -1,4 +1,4 @@
-name: Package Check
+name: Package Check & Publish
 
 on:
   push:
@@ -38,3 +38,23 @@ jobs:
         with:
           name: package-dist
           path: dist/*
+
+  publish:
+    needs: build-and-check
+    runs-on: ubuntu-latest
+
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: package-dist
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
